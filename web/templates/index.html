@@ -1,0 +1,507 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible"content="ie=edge">
+    <meta name="viewport"content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='./semantic/semantic.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='./d3/d3-context-menu.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='rainbow/github.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='common.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='dataVis.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='arrows.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='toast.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/CU_short_logo.png') }}">
+    <title>GMiner Demo</title>
+  </head>
+  <body>
+    <div id="side" class="ui left vertical inverted sidebar labeled icon menu visible">
+      <a class="item" id='configOpen'>
+        <i class="settings icon"></i>
+        Config
+      </a>
+      <a class="item" id='runButton'>
+        <i class="outline circle icon"></i>
+        Run
+      </a>
+      <a class="item" id='resumeButton'>
+        <i class="play outline circle icon"></i>
+        Resume
+      </a>
+      <a class="disabled item" id='pauseButton'>
+        <i class="pause outline circle icon"></i>
+        Pause
+      </a>
+      <a class="disabled item" id='stopButton'>
+        <i class="stop outline circle icon"></i>
+        Stop
+      </a>
+      <div style="flex-grow: 1;"></div>
+      
+      <a class="item" id='aboutOpen'>
+        <i class="info circle icon"></i>
+        About
+      </a>
+      <a class="item" href="http://www.cse.cuhk.edu.hk/~jcheng/papers/gminer_eurosys18.pdf" target="_blank">
+        <i class="file outline icon"></i>
+        Paper
+      </a>
+      <a class="item" id='compareOpen'>
+        <i class="balance scale icon"></i>
+        Comparison
+      </a>
+      <a class="item" id='teamOpen'>
+        <i class="users icon"></i>
+        Team
+      </a>
+    </div>
+    <div id="main-page">
+      <div id="main-grid">
+        <div id="content" class="block">
+          <div class="ui top attached menu" id='contentMenu'>
+            <a class="active item" group="visual">
+              Visualization
+            </a>
+            <a class="item" group="std">
+              Console Output
+            </a>
+            <a class="item" group="api">
+              Implementation
+            </a>
+          </div>
+          <div class="ui attached segment" id="console" style="padding:0">
+            <div id="stdConsole" group="std">
+              <p group="std"></p>
+            </div>
+            <div id="visualConsole" group="visual">
+              <div style="width:100%;">
+                <div class="ui top attached tabular menu">
+                    <div class="active item">Current Running Setting</div>
+                </div>
+                <div class="ui bottom attached active tab segment" style="padding-top: 0;">
+                  <table id="infoTable">
+                    <tr>
+                      <th align="left"><em>Sys config</em></th>
+                      {% for param in sysconfigs0 %}
+                      <th align="left">{{ param['name'] }}:</th>
+                      <td align="left" id="{{ 'table'+param['name'] }}"> {{ param['default'] }} (default) </td>
+                      {% endfor %}
+                    </tr>
+                    <tr>
+                      <th></th>
+                      {% for param in sysconfigs1 %}
+                      <th align="left">{{ param['name'] }}:</th>
+                      <td align="left" id="{{ 'table'+param['name'] }}"> {{ param['default'] }} (default) </td>
+                      {% endfor %}
+                      <th align="left">Network Interface:</th>
+                      <td id="tableib" align="left">Ethernet (default)</td>
+                    </tr>
+                    <tr>
+                      <th align="left"><em>App config</em></th>
+                      <th align="left">Application:</th>
+                      <td id="tableapps" align="left"> unset </td>
+                      <th align="left">Dataset:</th>
+                      <td id="tabledataset" align="left"> unset </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <div id="graphPanel" class="ui segment">
+                <div class="ui inverted dimmer">
+                  <div class="ui text loader">Submit job...</div>
+                </div>
+                <div id="gmgt">
+                  <h4 style="text-align:center; margin-top: 5px;">Pattern</h4>
+                  <svg>
+                  </svg>
+                </div>
+                <div id="graphnote">
+                </div>
+                <div id="statusTag">
+                </div>
+                <svg id="maingraph">
+                </svg>
+              </div>
+            <div id="toast"><div id="desc">Cannot remove the seed vertex.</div></div>
+            </div>
+            <div group="api" id="apiConsole">
+              <div group="api">
+                <p> Select an api example of G-Miner to show: </p>
+                <div id='apiradios'>
+                  {% for item in apps %}
+                    {% if loop.index == 1 %}
+                    {% for k, v in item.items() %}
+                    <div>
+                      <input type="radio" value="{{ k }}" name="apiname" checked>
+                      <label for="{{ k }}">{{ v["name"] }}</label>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    {% for k, v in item.items() %}
+                    <div>
+                      <input type="radio" value="{{ k }}" name="apiname" >
+                      <label for="{{ k }}">{{ v["name"] }}</label>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                {% for k, v in codes %}
+                  <pre value="{{ k }}"><code data-language="c">
+                    {{ v }}
+                  </code></pre>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="graph-col" >
+          <div id="footer">
+            <img id="img1" src="{{ url_for('static', filename='images/gminer_text.png') }}">
+            <img id="img2" src="{{ url_for('static', filename='images/CU_short_logo.png') }}">
+          </div>
+          <div id="queues" class="block">
+            <div>
+              <div class="row">
+                <div id="pq" class="ui indicating teal progress queue">
+                  <div class="label">Task Store</div>
+                  <div class="bar">
+                    <div class="progress"></div>
+                  </div>
+                </div>   
+                <div class="sideitem">
+                  <table class="rightdown arrows">
+                    <tr>
+                      <td><i class="chevron right icon ar-animated ar-delay"></i></td>
+                      <td><i class="chevron down icon ar-animated ar-delay-1s"></i></td>
+                    </tr>
+                    <tr>
+                      <td></td>
+                      <td><i class="chevron down icon ar-animated ar-delay-2s"></i></td>
+                    </tr>
+                    <tr>
+                      <td></td>
+                      <td><i class="chevron down icon ar-animated ar-delay-3s"></i></td>
+                    </tr>
+                    <tr>
+                      <td></td>
+                      <td><i class="chevron down icon ar-animated ar-delay-4s"></i></td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <div class="row">
+                <div class="sideitem">
+                  <table class="up arrows">
+                    {% for i in range(1, 5) %}
+                    <tr>
+                      <td><i class="chevron up icon ar-animated ar-delay-{{ 5 - i }}s"></i></td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                      <td><i class="chevron up icon ar-animated"></i></td>
+                    </tr>
+                  </table>
+                </div>
+                <div id="cmq" class="ui indicating orange progress queue">
+                  <div class="label">Candidate Retriever </div>
+                  <div class="bar">
+                    <div class="progress"></div>
+                  </div>
+                </div> 
+              </div>
+              <div class="row">
+                <div id="cpq" class="ui indicating blue progress queue">
+                  <div class="label">Task Executor</div>  
+                  <div class="bar">
+                    <div class="progress"></div>
+                  </div>
+                </div>
+                <div class="sideitem">
+                  <table class="downleft arrows">
+                    <tr>
+                      <td></td>
+                      <td><i class="chevron down icon ar-animated ar-delay"></i></td>
+                    </tr>
+                    <tr>
+                      <td></td>
+                      <td><i class="chevron down icon ar-animated ar-delay-1s"></i></td>
+                    </tr>
+                    <tr>
+                      <td></td>
+                      <td><i class="chevron down icon ar-animated ar-delay-2s"></i></td>
+                    </tr>
+                      <td>
+                        <i class="chevron left icon ar-animated ar-delay-4s"></i>
+                      </td>
+                      <td><i class="chevron down icon ar-animated ar-delay-3s"></i></td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+              <div class="row">
+                <table class="down arrows">
+                  <tr>
+                    <td>
+                      <i class="chevron down icon ar-animated ar-delay"></i>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><i class="flag checkered icon"></i></td>
+                  </tr>
+                </table>
+              </div>
+              <div class="row" id="qlegend">
+                <div><img height="12px" width="12px" style="background-color: #00b5ad"><span id="qlabel1">0</span> Tasks/sec</div>
+                <div><img height="12px" width="12px" style="background-color: #f2711c"><span id="qlabel2">0</span> Tasks/sec</div>
+                <div><img height="12px" width="12px" style="background-color: #2185d0"><span id="qlabel3">0</span> Tasks/sec</div>
+                <div><img height="12px" width="12px" style="background-color: black"><span id="qlabel4">0</span> Tasks/sec</div>
+              </div>
+            </div>
+          </div>
+          <div id="timeline" class="block">
+            <h3> Cluster Resource Monitor </h3>
+            <div id="chartView"></div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+    <div class='ui modal' id='aboutModal'>
+      <i class="close icon"></i>
+      <div class='header'>About</div>
+      <div class='content'>
+        <div id="description">
+        <div class="leading">
+          <p>G-Miner is a general distributed system aimed at graph mining over large-scale graphs.</p>
+        </div>
+        <div class="content">
+          <p style="text-align:justify; margin-top: 1.2rem;">
+            Graph mining is one of the most important areas in data mining. 
+            However, scalable solutions for graph mining are still lacking as existing studies focus on sequential algorithms. 
+            While many distributed graph processing systems have been proposed in recent years, most of them were designed to 
+            parallelize computations such as PageRank and Breadth-First Search that keep states on individual vertices and 
+            propagate updates along edges. Graph mining, on the other hand, may generate many subgraphs whose number can far 
+            exceed the number of vertices. This inevitably leads to much higher computational and space complexity rendering 
+            existing graph systems inefficient. We propose G-Miner, a distributed system with a new architecture designed for 
+            general graph mining. G-Miner adopts a unified programming framework for implementing a wide range of graph mining 
+            algorithms. We model subgraph processing as independent tasks, and design a novel task pipeline to streamline task 
+            processing for better CPU, network and I/O utilization.
+          </p>
+          <p>For more details, please refer to our <a href="https://github.com/yaobaiwei/GMiner" target="_blank">github project</a>.</p>
+        </div>
+        </div>
+      </div>
+    </div>
+    <div class='ui modal' id='configModal'>
+      <i class="close icon"></i>
+      <div class='header'>Config</div>
+      <div id="config" class="content">
+        <form class="ui form">
+          <div class="two fields">
+            <div class="field" id="sysConfig">
+              <h4 class="ui dividing header"> System Configuration </h4>
+              <div class="three fields">
+                {% for param in sysconfigs0 %}
+                  <div class="field popup" data-content="{{ param['help'] }}">
+                    <label for="{{ param['name'] }}">{{ param['name'] }}</label>
+                    <input type="text" placeholder="{{ param['default'] }}" id="{{ param['name'] }}" name="{{ param['name'] }}">
+                  </div>
+                {% endfor %}
+              </div>
+              <div class="three fields">
+                {% for param in sysconfigs1 %}
+                  <div class="field popup" data-content="{{ param['help'] }}">
+                    <label for="{{ param['name'] }}">{{ param['name'] }}</label>
+                    <input type="text" placeholder="{{ param['default'] }}" id="{{ param['name'] }}" name="{{ param['name'] }}">
+                  </div>
+                {% endfor %}
+                <div class="field">
+                  <div class="ui checkbox" style="padding-top: 25%">
+                    <input type="checkbox" tabindex="0" class="hidden" id="ib" name="ib" value="ib">
+                    <label for="ib">Infiniband</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="field" id="appConfig">
+              <h4 class="ui dividing header"> Application Configuration </h4>
+              <div class="two fields">
+                <div class="field">
+                  <label for="apps">Application</label>
+                  <select class="ui dropdown" name="apps" id="apps">
+                    <option value=""></option>
+                    {% for item in apps %}
+                      {% for k, v in item.items() %}
+                        <option value="{{ k }}"> {{ v["name"] }} </option>
+                      {% endfor %}
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="dataset">Dataset</label>
+                  <select class="ui dropdown" name="dataset" id="dataset">
+                    <option value=""></option>
+                    {% for item in datasets %}
+                      <option value="{{ item }}"> {{ item }} </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="appParam">
+            <h4 class="ui dividing header"> XXX parameters </h4>
+            <div class="fields">
+              {% for item in apps %}
+                {% for k, v in item.items() %}
+                  {% if v['param']: %}
+                    {% for param in v['param'] %}
+                    <div class="field param {{ k }} popup" data-content="{{ param['help'] }}">
+                      <label for="{{ param['name'] }}">{{ param['name'] }}</label>
+                      <input type="text" placeholder="{{ param['default'] }}" id="{{ param['name'] }}" name="{{ param['name'] }}" data-type="{{ param['type'] }}">
+                    </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              {% endfor %}
+            </div>
+          </div>
+          <div id="samplingRules">
+            <h4 class="ui dividing header"> Sampling Rules for Visualization </h4>
+            <div class="fields">
+              {% for item in apps %}
+                {% for k, v in item.items() %}
+                  {% if v['rules']: %}
+                    {% for rules in v['rules'] %}
+                    <div class="field rules {{ k }} popup" data-content="{{ rules['help'] }}">
+                      <label for="{{ rules['name'] }}">{{ rules['name'] }}</label>
+                      <input type="text" placeholder="{{ rules['default'] }}" id="{{ rules['name'] }}" name="{{ rules['name'] }}" data-type="{{ rules['type'] }}">
+                    </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              {% endfor %}
+            </div>
+          </div>
+          <div class="ui error message"></div>
+        </form>
+      </div>
+      <div class="actions">
+        <div class="ui green approve button">Confirm</div>
+      </div>
+    </div>
+    <div class='ui modal' id='compareModal'>
+      <i class="close icon"></i>
+      <div class="header">Comparison</div>
+      {% for image in slideimages %}
+      <div class="compare-item content" style="display: none;">
+        <div id="description">
+        <div class="leading">
+        <p style="margin-bottom: 1.5rem;"> Page {{ loop.index }}/{{ loop.length }} </p>
+        </div>
+        </div>
+        <div class="image">
+          <img src="{{ url_for('static', filename='images/{}.png'.format(image['slide'])) }}" alt="loading..." {% if loop.index==6 %}height="400"{% endif %}>
+        </div>
+        <div id="description">
+        <div class='content'>
+        <p style="margin-top: 2.0rem;"> {{ image['description'] }} </p>
+        </div>
+        </div>
+      </div>
+      {% endfor %}
+      <div class="actions">
+        <div class="ui primary button" id="prev">
+          Prev
+          <i class="left chevron icon"></i>
+        </div>
+        <div class="ui primary button" id="next">
+          Next
+          <i class="right chevron icon"></i>
+        </div>
+      </div>
+    </div>
+    <div class='ui modal' id='teamModal'>
+      <i class="close icon"></i>
+      <div class="header">
+        <span style="font-size: 1.8rem;">Team</span>
+        <img src="{{ url_for('static',filename='./images/CU_long_logo.jpg') }}" style="float:right; height: 2.5rem;">
+      </div>
+      <div class='content'>
+        <table border="0">
+          {% for row in supervisors %}
+          <tr>
+            {% for person in row %}
+            <td valign="top">
+              <div style="float:left; margin-right: 1rem">
+                <img src="{{ url_for('static',filename='./images/{}'.format(person['img'])) }}" width="128" height="171">
+              </div>
+              <p>
+                <span class="personName">{{ person['name'] }}</span>
+                <span>{{ person['info'] }}</span>
+                <br>
+                <span>{{ person['other'] }}</span>
+              </p>
+            </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+          <tr>
+            <td align="center">&nbsp;</td>
+          </tr>
+          <tr>
+            <td align="center" style='border-style: solid; border-width:1px 0 0 0; border-color:darkgray;' colspan="2">
+            </td>
+          </tr>
+          <tr>
+            <td align="center">&nbsp;</td>
+          </tr>
+          {% for row in teammembers %}
+          <tr>
+            {% for person in row %}
+            <td valign="top" >
+              <div style="float:left; margin-right: 1rem">
+                <img src="{{ url_for('static',filename='./images/{}'.format(person['img'])) }}" width="128" height="171">
+              </div>
+              <p>
+                <span class="personName">{{ person['name'] }}</span>
+                <span>{{ person['info'] }}</span>
+              </p>
+            </td>
+            {% endfor %}
+          </tr>
+          {% if loop.index != loop.length %}
+          <tr>
+            <td align="center">&nbsp;</td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="ui tiny modal" id="resumeModal">
+      <i class="close icon"></i>
+      <div class="content">
+        <p>
+        Sorry, because of <b>inevitable network delay</b>
+        , the job can not be resumed because it finished before this resume request.
+        </p>
+      </div>
+    </div>
+    <!-- scripts -->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="http://static.runoob.com/assets/jquery-validation-1.14.0/dist/jquery.validate.min.js"></script>
+    <script src="{{ url_for('static', filename='./semantic/semantic.min.js') }}"></script>
+    <script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g2-3.4.1/dist/g2.min.js"></script>
+    <script src="{{ url_for('static', filename='d3/d3.js') }}"></script>
+    <script src="{{ url_for('static', filename='d3/d3-context-menu.js') }}"></script>
+    <script src="{{ url_for('static', filename='rainbow/rainbow.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='rainbow/generic.js') }}"></script>
+    <script src="{{ url_for('static', filename='rainbow/c.js') }}"></script>
+    <script src="{{ url_for('static', filename='global.js') }}"></script>
+    <script src="{{ url_for('static', filename='common.js') }}"></script>
+    <script src="{{ url_for('static', filename='validate_form.js') }}"></script>
+    <script src="{{ url_for('static', filename='cpumonitor.js') }}"></script>
+    <script src="{{ url_for('static', filename='visual.js') }}"></script>
+  </body>
+</html>

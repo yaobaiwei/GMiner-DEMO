@@ -1,0 +1,247 @@
+body {
+  width: 100%;
+  height: 100%;
+  font-size: 16px;
+  background-color: #EFEFEF; 
+  overflow: scroll;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+.block {
+  box-shadow: 0 5px 5px rgba(0,0,0,0.1);
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 0;
+  border-color: #c7c7c7;
+}
+#main-grid {
+  display: flex;
+  /* occupy remain place */
+  position: absolute;
+  /* left: 8rem;  left sidebar */
+  top: 1rem;
+  bottom: 1rem;
+  right: 1rem;
+}
+/* ----- Modal ----- */
+#resumeButton {
+  display: none;
+}
+#teamModal,#compareModal {
+  height: calc(100% - 6rem);
+}
+#configModal,#aboutModal{
+  height: calc(100% - 10rem);
+}
+.ui.modal>.header:first-of-type {
+  height: 4.5rem;
+}
+.ui.modal .actions {
+  height: 4.5rem;
+}
+#configModal>.content,
+#compareModal>.comtent
+{
+  height: calc(100% - 9rem);
+}
+.compare-item {
+  text-align: center;
+  overflow-y: scroll;
+}
+#aboutModal>.content, #teamModal>.content {
+  height: calc(100% - 4.5rem);
+}
+
+#teamModal>.content,
+#compareModal>.content {
+  overflow-y: scroll;
+}
+#teamModal .personName {
+  font-weight: bold;
+}
+
+/* ------------------ */
+
+/* ------------- console --------------- */
+#content {
+  height: 100%;
+  width: 68%;
+}
+#content #contentMenu{
+  height: 3em;
+}
+#apiConsole,#visualConsole,#stdConsole {
+  padding: 1.5rem;
+  height: calc(100% - 3em);
+  width: 100%;
+}
+#visualConsole {
+  padding-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+#apiConsole, #stdConsole {
+  overflow-y: scroll;
+}
+#graphPanel {
+  flex-grow: 1;
+  width: 100%;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  border-width: 0;
+  box-shadow: 0 0 0 0;
+}
+#graphPanel #maingraph {
+  width: 100%;
+}
+#gmgt {
+  display: none;
+  position: absolute;
+  margin-top: 1rem;
+  width: 100;
+  height: 150;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 5px;
+  border-color: rgba(0,0,0,0.18);
+}
+#gmgt svg {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+}
+#graphnote {
+  position: absolute;
+  margin-top: 1rem;
+  padding: 1rem;
+  right: 0;
+  background-color: #FFFFCC;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #FFCC00;
+  border-radius: 5px;
+  max-width: 25%;
+  display: none;
+}
+#graphnote h4 {
+  text-align: center;
+}
+#statusTag {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  padding-top: 1rem;
+  font-size: 1.5rem;
+  display: none;
+}
+#maingraph line, circle{
+  cursor: pointer;
+}
+/* ------------------- */
+/* ------------- api --------------- */
+#apiradios {
+  display: flex;
+  width: calc(100% - 3rem);
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+div[group=api] pre{
+  width: calc(100%-3rem);
+  overflow-x: scroll;
+}
+/*---------*/
+/* ------------ infoTable ---------- */
+#infoTable {
+  width: 100%;
+}
+#infoTable th{
+  height: 2em;
+}
+.seghead {
+  height: 1.8em;
+}
+/* ----------- Side Panels ---------------*/
+#graph-col {
+  display: inline-flex;
+  flex-direction: column;
+  align-content: center; 
+  width: 32%;
+  padding-left:20px;
+  height: 100%;
+}
+
+#queues {
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 24rem !important;
+  height: 45%;
+}
+#queues>div:first-of-type {
+  width: 90%;
+}
+#queues .row {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+#pq,#cmq,#cpq {
+  flex-grow: 1;
+  margin: 3.5rem 0 0 0;
+}
+#queues .sideitem {
+  width: calc(100% / 6);
+}
+#pq .label,#cmq .label,#cpq .label{
+  top: unset;
+  bottom: 1.7rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+#timeline {
+  margin-top: 16px;
+  background-color: white;
+  padding-left: 5%;
+  height: calc(45% - 2rem);
+}
+
+#side {
+  display: flex;
+}
+
+#timeline h3 {
+  margin-top: 1.2rem;
+  text-align: center;
+}
+
+#description .leading{
+  top: unset;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+#description .content{
+  top: unset;
+  font-size: 1.2rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+#footer {
+  margin-bottom: 0.5rem;
+  height: 10%;
+  opacity: 0.8;
+  text-align: center;
+}
+#img2 {
+  height: 80%;
+}
+#img1 {
+  height: 80%;
+}

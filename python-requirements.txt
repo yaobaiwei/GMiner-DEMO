@@ -1,0 +1,5 @@
+flask==0.12.2
+argparse
+mpi4py
+psutil
+numpy
